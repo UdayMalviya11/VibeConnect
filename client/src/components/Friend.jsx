@@ -1,6 +1,7 @@
 import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
+import { config } from "../config";
 import { useNavigate } from "react-router-dom";
 import { setFriends } from "state";
 import FlexBetween from "./FlexBetween";
@@ -11,7 +12,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
   const navigate = useNavigate();
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
-  const friends = useSelector((state) => state.user.friends);
+  const friends = useSelector((state) => state.user?.friends);
 
   const { palette } = useTheme();
   const primaryLight = palette.primary.light;
@@ -19,11 +20,16 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
   const main = palette.neutral.main;
   const medium = palette.neutral.medium;
 
-  const isFriend = friends.find((friend) => friend._id === friendId);
+  const isFriend = Array.isArray(friends) && friends.some((friend) => {
+    if (!friend) return false;
+    if (typeof friend === 'string') return String(friend) === String(friendId);
+    if (typeof friend === 'object') return String(friend._id || friend.id) === String(friendId);
+    return false;
+  });
 
   const patchFriend = async () => {
     const response = await fetch(
-      `http://localhost:3001/users/${_id}/${friendId}`,
+      `${config.apiBaseUrl}/users/${_id}/${friendId}`,
       {
         method: "PATCH",
         headers: {
@@ -64,6 +70,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
           </Typography>
         </Box>
       </FlexBetween>
+      {String(friendId) !== String(_id) && (
       <IconButton
         onClick={() => patchFriend()}
         sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
@@ -74,6 +81,7 @@ const Friend = ({ friendId, name, subtitle, userPicturePath }) => {
           <PersonAddOutlined sx={{ color: primaryDark }} />
         )}
       </IconButton>
+      )}
     </FlexBetween>
   );
 };

@@ -74,32 +74,61 @@ export const themeSettings = (mode) => {
             },
           }),
     },
+    shape: {
+      borderRadius: 14,
+    },
     typography: {
       fontFamily: ["Rubik", "sans-serif"].join(","),
-      fontSize: 12,
+      fontSize: 13,
       h1: {
         fontFamily: ["Rubik", "sans-serif"].join(","),
-        fontSize: 40,
+        fontSize: 42,
       },
       h2: {
         fontFamily: ["Rubik", "sans-serif"].join(","),
-        fontSize: 32,
+        fontSize: 34,
       },
       h3: {
         fontFamily: ["Rubik", "sans-serif"].join(","),
-        fontSize: 24,
+        fontSize: 26,
       },
       h4: {
         fontFamily: ["Rubik", "sans-serif"].join(","),
-        fontSize: 20,
+        fontSize: 22,
       },
       h5: {
         fontFamily: ["Rubik", "sans-serif"].join(","),
-        fontSize: 16,
+        fontSize: 18,
       },
       h6: {
         fontFamily: ["Rubik", "sans-serif"].join(","),
-        fontSize: 14,
+        fontSize: 15,
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 999,
+            textTransform: "none",
+            paddingLeft: "1rem",
+            paddingRight: "1rem",
+          },
+        },
+      },
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            borderRadius: 14,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 16,
+          },
+        },
       },
     },
   };

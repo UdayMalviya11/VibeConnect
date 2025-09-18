@@ -6,6 +6,8 @@ const initialState = {
   token: null,
   posts: [],
   friends: [],
+  notifications: [], // { id, type: 'like'|'follow', fromUser, postId?, createdAt, read }
+  searchQuery: "",
 };
 
 export const authSlice = createSlice({
@@ -40,9 +42,26 @@ export const authSlice = createSlice({
       });
       state.posts = updatedPosts;
     },
+    setSearchQuery: (state, action) => {
+      state.searchQuery = action.payload || "";
+    },
+    addNotification: (state, action) => {
+      const notif = action.payload; // { id, type, fromUser, postId?, createdAt }
+      state.notifications.unshift({ ...notif, read: false });
+    },
+    markAllNotificationsRead: (state) => {
+      state.notifications = state.notifications.map((n) => ({ ...n, read: true }));
+    },
+    removeNotification: (state, action) => {
+      const id = action.payload;
+      state.notifications = state.notifications.filter((n) => n.id !== id);
+    },
+    setNotifications: (state, action) => {
+      state.notifications = action.payload || [];
+    },
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost } =
+export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost, addNotification, markAllNotificationsRead, removeNotification, setNotifications, setSearchQuery } =
   authSlice.actions;
 export default authSlice.reducer;

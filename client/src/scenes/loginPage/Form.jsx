@@ -7,6 +7,8 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import { IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -15,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { setLogin } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
+import { config } from "../../config";
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
@@ -48,6 +51,7 @@ const initialValuesLogin = {
 
 const Form = () => {
   const [pageType, setPageType] = useState("login");
+  const [showPassword, setShowPassword] = useState(false);
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -64,7 +68,7 @@ const Form = () => {
     formData.append("picturePath", values.picture.name);
 
     const savedUserResponse = await fetch(
-      "http://localhost:3001/auth/register",
+      `${config.apiBaseUrl}/auth/register`,
       {
         method: "POST",
         body: formData,
@@ -79,7 +83,7 @@ const Form = () => {
   };
 
   const login = async (values, onSubmitProps) => {
-    const loggedInResponse = await fetch("http://localhost:3001/auth/login", {
+    const loggedInResponse = await fetch(`${config.apiBaseUrl}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
@@ -121,7 +125,7 @@ const Form = () => {
         <form onSubmit={handleSubmit}>
           <Box
             display="grid"
-            gap="30px"
+            gap="20px"
             gridTemplateColumns="repeat(4, minmax(0, 1fr))"
             sx={{
               "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
@@ -175,9 +179,10 @@ const Form = () => {
                 />
                 <Box
                   gridColumn="span 4"
-                  border={`1px solid ${palette.neutral.medium}`}
-                  borderRadius="5px"
+                  border={`1px dashed ${palette.neutral.medium}`}
+                  borderRadius="8px"
                   p="1rem"
+                  sx={{ backgroundColor: palette.background.alt }}
                 >
                   <Dropzone
                     acceptedFiles=".jpg,.jpeg,.png"
@@ -189,13 +194,18 @@ const Form = () => {
                     {({ getRootProps, getInputProps }) => (
                       <Box
                         {...getRootProps()}
-                        border={`2px dashed ${palette.primary.main}`}
-                        p="1rem"
-                        sx={{ "&:hover": { cursor: "pointer" } }}
+                        p="0.75rem 1rem"
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          "&:hover": { cursor: "pointer", opacity: 0.9 },
+                          color: palette.neutral.medium,
+                        }}
                       >
                         <input {...getInputProps()} />
                         {!values.picture ? (
-                          <p>Add Picture Here</p>
+                          <Typography variant="body2">Drop an image here or click to upload</Typography>
                         ) : (
                           <FlexBetween>
                             <Typography>{values.picture.name}</Typography>
@@ -221,7 +231,7 @@ const Form = () => {
             />
             <TextField
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               onBlur={handleBlur}
               onChange={handleChange}
               value={values.password}
@@ -229,6 +239,19 @@ const Form = () => {
               error={Boolean(touched.password) && Boolean(errors.password)}
               helperText={touched.password && errors.password}
               sx={{ gridColumn: "span 4" }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword((v) => !v)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
           </Box>
 
@@ -238,11 +261,13 @@ const Form = () => {
               fullWidth
               type="submit"
               sx={{
-                m: "2rem 0",
-                p: "1rem",
+                mt: "1.5rem",
+                p: "0.9rem",
+                borderRadius: "9999px",
                 backgroundColor: palette.primary.main,
                 color: palette.background.alt,
-                "&:hover": { color: palette.primary.main },
+                boxShadow: 3,
+                "&:hover": { color: palette.primary.main, backgroundColor: palette.background.paper },
               }}
             >
               {isLogin ? "LOGIN" : "REGISTER"}
@@ -259,6 +284,8 @@ const Form = () => {
                   cursor: "pointer",
                   color: palette.primary.light,
                 },
+                textAlign: 'center',
+                mt: 1,
               }}
             >
               {isLogin

@@ -17,6 +17,7 @@ import { verifyToken } from "./middleware/auth.js";
 import User from "./models/User.js";
 import Post from "./models/Post.js";
 import { users, posts } from "./data/index.js";
+import { initIO } from "./realtime/io.js";
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -38,14 +39,24 @@ const storage = multer.diskStorage({
     cb(null, "public/assets");
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname);
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const base = file.originalname.replace(/[^a-zA-Z0-9_.-]/g, "_");
+    cb(null, `${unique}-${base}`);
   },
 });
 const upload = multer({ storage });
 
 /* ROUTES WITH FILES */
 app.post("/auth/register", upload.single("picture"), register);
-app.post("/posts", verifyToken, upload.single("picture"), createPost);
+app.post(
+  "/posts",
+  verifyToken,
+  upload.fields([
+    { name: "attachments", maxCount: 20 },
+    { name: "picture", maxCount: 1 },
+  ]),
+  createPost
+);
 
 /* ROUTES */
 app.use("/auth", authRoutes);
@@ -53,15 +64,15 @@ app.use("/users", userRoutes);
 app.use("/posts", postRoutes);
 
 /* MONGOOSE SETUP */
-// const PORT = process.env.PORT || 6001;
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => {
-    app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+    const server = app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+    initIO(server);
 
     /* ADD DATA ONE TIME */
     //User.insertMany(users);

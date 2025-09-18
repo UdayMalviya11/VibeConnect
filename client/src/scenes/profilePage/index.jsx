@@ -1,5 +1,6 @@
 import { Box, useMediaQuery } from "@mui/material";
 import { useEffect, useState } from "react";
+import { config } from "../../config";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import Navbar from "scenes/navbar";
@@ -13,9 +14,10 @@ const ProfilePage = () => {
   const { userId } = useParams();
   const token = useSelector((state) => state.token);
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+  const loggedInUserId = useSelector((state) => state.user?._id);
 
   const getUser = async () => {
-    const response = await fetch(`http://localhost:3001/users/${userId}`, {
+    const response = await fetch(`${config.apiBaseUrl}/users/${userId}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -23,8 +25,18 @@ const ProfilePage = () => {
     setUser(data);
   };
 
+  const recordProfileView = async () => {
+    try {
+      await fetch(`${config.apiBaseUrl}/users/${userId}/view`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch {}
+  };
+
   useEffect(() => {
     getUser();
+    recordProfileView();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return null;
@@ -48,8 +60,12 @@ const ProfilePage = () => {
           flexBasis={isNonMobileScreens ? "42%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
-          <MyPostWidget picturePath={user.picturePath} />
-          <Box m="2rem 0" />
+          {String(loggedInUserId) === String(userId) && (
+            <>
+              <MyPostWidget picturePath={user.picturePath} />
+              <Box m="2rem 0" />
+            </>
+          )}
           <PostsWidget userId={userId} isProfile />
         </Box>
       </Box>
