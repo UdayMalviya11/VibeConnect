@@ -21,7 +21,11 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "npm install --legacy-peer-deps"
+  },
+  "overrides": {
+    "multer": "^1.4.5-lts.1"
   },
   "keywords": [],
   "author": "",
