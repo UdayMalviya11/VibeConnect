@@ -25,12 +25,13 @@ const PostsWidget = ({ userId, isProfile = false }) => {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await response.json();
+    const list = Array.isArray(data) ? data : (Array.isArray(data?.posts) ? data.posts : []);
     if (pageNum === 0) {
-      dispatch(setPosts({ posts: data }));
+      dispatch(setPosts({ posts: list }));
     } else {
-      dispatch(setPosts({ posts: [...posts, ...data] }));
+      dispatch(setPosts({ posts: [...(Array.isArray(posts) ? posts : []), ...list] }));
     }
-    setHasMore(data.length === 10);
+    setHasMore(list.length === 10);
     setIsLoading(false);
   }, [dispatch, token, posts, isLoading]);
 
@@ -45,12 +46,13 @@ const PostsWidget = ({ userId, isProfile = false }) => {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await response.json();
+    const list = Array.isArray(data) ? data : (Array.isArray(data?.posts) ? data.posts : []);
     if (pageNum === 0) {
-      dispatch(setPosts({ posts: data }));
+      dispatch(setPosts({ posts: list }));
     } else {
-      dispatch(setPosts({ posts: [...posts, ...data] }));
+      dispatch(setPosts({ posts: [...(Array.isArray(posts) ? posts : []), ...list] }));
     }
-    setHasMore(data.length === 10);
+    setHasMore(list.length === 10);
     setIsLoading(false);
   }, [dispatch, token, posts, userId, isLoading]);
 
@@ -82,7 +84,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
 
   return (
     <>
-      {posts.filter(p => {
+      {(Array.isArray(posts) ? posts : []).filter(p => {
         if (!query) return true;
         const hay = `${p.firstName} ${p.lastName} ${p.description || ""} ${p.location || ""}`.toLowerCase();
         return hay.includes(query);
