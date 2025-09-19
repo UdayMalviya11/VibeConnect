@@ -92,6 +92,16 @@ mongoose
   })
   .catch((error) => console.log(`${error} did not connect`));
 
+// Root endpoint
+app.get("/", (req, res) => {
+  res.json({ 
+    message: "VibeConnect API Server", 
+    status: "running",
+    timestamp: new Date().toISOString(),
+    endpoints: ["/auth", "/users", "/posts", "/health", "/test"]
+  });
+});
+
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
