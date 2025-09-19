@@ -31,17 +31,23 @@ app.use(morgan("common"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 
-// CORS configuration for Vercel
+// CORS configuration for Vercel - more permissive for debugging
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://vibe-connect-ws2o.vercel.app",
-    /^https:\/\/.*\.vercel\.app$/
-  ],
+  origin: true, // Allow all origins for now
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  optionsSuccessStatus: 200
 }));
+
+// Handle preflight requests
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
 
 app.use("/assets", express.static(path.join(__dirname, "../public/assets")));
 
@@ -89,6 +95,22 @@ mongoose
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+// Test endpoint
+app.get("/test", (req, res) => {
+  res.json({ message: "Server is working!", origin: req.headers.origin });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: 'Something went wrong!' });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ error: 'Route not found', path: req.originalUrl });
 });
 
 // Export for Vercel
