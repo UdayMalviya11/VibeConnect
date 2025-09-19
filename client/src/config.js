@@ -4,9 +4,12 @@ const API_BASE_URL =
   (typeof window !== 'undefined' && window.__API_BASE_URL__) ||
   'http://localhost:3001';
 
+// Ensure no double slashes
+const cleanApiBaseUrl = API_BASE_URL.replace(/\/+$/, '');
+
 export const config = {
-  apiBaseUrl: API_BASE_URL,
-  assetsBaseUrl: `${API_BASE_URL}/assets`,
+  apiBaseUrl: cleanApiBaseUrl,
+  assetsBaseUrl: `${cleanApiBaseUrl}/assets`,
 };
 
 export default config;
