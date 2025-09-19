@@ -16,7 +16,7 @@ import { createPost } from "../controllers/posts.js";
 import { verifyToken } from "../middleware/auth.js";
 import User from "../models/User.js";
 import Post from "../models/Post.js";
-import { users, posts } from "../data/index.js";
+// import { users, posts } from "../data/index.js"; // keep disabled in production
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -148,7 +148,7 @@ app.get("/test", (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  res.status(500).json({ error: 'Something went wrong!' });
+  res.status(500).json({ error: 'Something went wrong!', message: err?.message });
 });
 
 // 404 handler
