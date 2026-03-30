@@ -31,21 +31,12 @@ app.use(morgan("common"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 
-// CORS configuration with env-driven allowlist
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.CLIENT_ORIGIN || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-
+// CORS configuration
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, curl)
-      if (!origin) return callback(null, true);
-      // If no allowlist defined, allow all (useful during first deploys)
-      if (allowedOrigins.length === 0) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
+      // Accept all origins dynamically to prevent CORS errors during dev/deployment
+      callback(null, origin || "*");
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -60,27 +51,6 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
-
-// Handle preflight requests explicitly to avoid redirects breaking CORS
-app.options("*", (req, res) => {
-  const origin = req.headers.origin || "*";
-  // If allowlist is set, only echo back allowed origin; otherwise '*'
-  const allowOrigin =
-    allowedOrigins.length === 0 || allowedOrigins.includes(origin) ? origin : "*";
-  res.header("Access-Control-Allow-Origin", allowOrigin);
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With, Accept, Origin"
-  );
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Vary", "Origin");
-  res.header("Access-Control-Max-Age", "86400");
-  return res.sendStatus(200);
-});
 
 app.use("/assets", express.static(path.join(__dirname, "../public/assets")));
 

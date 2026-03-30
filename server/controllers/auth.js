@@ -36,7 +36,7 @@ export const register = async (req, res) => {
     delete userWithoutPassword.password;
     res.status(201).json(userWithoutPassword);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(404).json({ error: err.message });
   }
 };
 

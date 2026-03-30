@@ -6,12 +6,9 @@ const userIdToSockets = new Map(); // userId -> Set<socket>
 
 export const initIO = (httpServer) => {
   if (ioInstance) return ioInstance;
-  const socketCorsOrigin = process.env.SOCKET_ORIGIN
-    ? new RegExp(process.env.SOCKET_ORIGIN)
-    : [/http:\/\/localhost:3000$/, /http:\/\/127\.0\.0\.1:3000$/, /https?:\/\/.+vercel\.app$/];
   ioInstance = new Server(httpServer, {
     cors: {
-      origin: socketCorsOrigin,
+      origin: true,
       methods: ["GET", "POST"],
     },
   });
