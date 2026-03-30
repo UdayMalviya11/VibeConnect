@@ -4,8 +4,7 @@ import {
   FavoriteOutlined,
   ShareOutlined,
 } from "@mui/icons-material";
-import { Box, Divider, IconButton, Typography, useTheme, TextField, Button, Avatar, Menu, MenuItem, ListItemIcon, ListItemText, Dialog, DialogTitle, DialogContent, List, ListItemButton } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
+import { Box, Divider, IconButton, Typography, useTheme, TextField, Button, Avatar, Menu, ListItemText, Dialog, DialogTitle, DialogContent, List, ListItemButton } from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";

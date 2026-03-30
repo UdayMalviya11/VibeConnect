@@ -1,5 +1,4 @@
 import {
-  EditOutlined,
   DeleteOutlined,
   AttachFileOutlined,
   GifBoxOutlined,

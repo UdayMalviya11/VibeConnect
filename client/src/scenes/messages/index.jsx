@@ -150,7 +150,7 @@ const MessagesPage = () => {
         socketRef.current.off("presence:update");
       }
     };
-  }, [token, selectedFriend?._id, user?._id]);
+  }, [token, selectedFriend?._id, user?._id, markRead]);
 
   // Auto scroll to bottom on new messages
   useEffect(() => {

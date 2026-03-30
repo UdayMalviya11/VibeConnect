@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@mui/material";
+import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { config } from "../../config";
 import { useParams } from "react-router-dom";
@@ -7,7 +7,6 @@ import PostWidget from "scenes/widgets/PostWidget";
 import { useSelector } from "react-redux";
 
 const PostPage = () => {
-  const { palette } = useTheme();
   const { postId } = useParams();
   const token = useSelector((s)=>s.token);
   const [post, setPost] = useState(null);
