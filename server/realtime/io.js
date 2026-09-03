@@ -6,10 +6,17 @@ const userIdToSockets = new Map(); // userId -> Set<socket>
 
 export const initIO = (httpServer) => {
   if (ioInstance) return ioInstance;
+
+  // Use configurable CORS origins for Socket.io
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",")
+    : ["http://localhost:3000", "http://localhost:3001"];
+
   ioInstance = new Server(httpServer, {
     cors: {
-      origin: true,
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
+      credentials: true,
     },
   });
 
@@ -33,9 +40,16 @@ export const initIO = (httpServer) => {
     // send snapshot of online users
     try {
       socket.emit("presence:snapshot", Array.from(userIdToSockets.keys()));
-    } catch {}
-    // notify others this user is online
-    try { ioInstance.emit("presence:update", { userId, online: true }); } catch {}
+    } catch (err) {
+      console.error("[Socket] Error emitting presence snapshot:", err.message);
+    }
+
+    // notify others (except sender) that this user is online
+    try {
+      socket.broadcast.emit("presence:update", { userId, online: true });
+    } catch (err) {
+      console.error("[Socket] Error broadcasting presence:update:", err.message);
+    }
 
     socket.on("disconnect", () => {
       const set = userIdToSockets.get(userId);
@@ -43,16 +57,28 @@ export const initIO = (httpServer) => {
         set.delete(socket);
         if (set.size === 0) userIdToSockets.delete(userId);
       }
-      // notify others this user is offline
-      try { ioInstance.emit("presence:update", { userId, online: false }); } catch {}
+      // notify others (except sender) that this user is offline
+      try {
+        socket.broadcast.emit("presence:update", { userId, online: false });
+      } catch (err) {
+        console.error("[Socket] Error broadcasting disconnect:", err.message);
+      }
     });
 
-    // typing indicator relay
+    // typing indicator relay with error handling
     socket.on("chat:typing", ({ toUserId, typing }) => {
-      if (!socket.userId || !toUserId) return;
+      if (!socket.userId || !toUserId) {
+        console.warn("[Socket] Missing userId or toUserId in typing event");
+        return;
+      }
       try {
-        emitToUser(String(toUserId), "chat:typing", { fromUserId: String(socket.userId), typing: !!typing });
-      } catch {}
+        emitToUser(String(toUserId), "chat:typing", {
+          fromUserId: String(socket.userId),
+          typing: !!typing,
+        });
+      } catch (err) {
+        console.error("[Socket] Error emitting typing indicator:", err.message);
+      }
     });
   });
 
@@ -61,14 +87,19 @@ export const initIO = (httpServer) => {
 
 export const emitToUser = (userId, event, payload) => {
   const set = userIdToSockets.get(String(userId));
-  if (!set) return;
+  if (!set) {
+    console.warn(`[Socket] User ${userId} not connected or no sockets available`);
+    return;
+  }
   for (const s of set) {
-    s.emit(event, payload);
+    try {
+      s.emit(event, payload);
+    } catch (err) {
+      console.error(`[Socket] Error emitting ${event} to user ${userId}:`, err.message);
+    }
   }
 };
 
 export const getIO = () => ioInstance;
 
 export const isUserOnline = (userId) => userIdToSockets.has(String(userId));
-
-
